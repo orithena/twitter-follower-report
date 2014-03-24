@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import twython
 import config
 from time import time
@@ -40,11 +42,11 @@ def main():
     
     followers = r.zrevrange('followers', 0, -1)
     friends = r.zrevrange('friends', 0, -1)
-    body.append('*** People not following you back ***')
-    body.append('')
+    body.append(u'*** People not following you back ***')
+    body.append(u'')
     add_details_to_report(list(set(friends) - set(followers)))
-    body.append('*** People you don\'t follow back ***')
-    body.append('')
+    body.append(u'*** People you don\'t follow back ***')
+    body.append(u'')
     add_details_to_report(list(set(followers) - set(friends)))
 
     # send email report
@@ -55,18 +57,24 @@ def main():
         'text': '\n'.join(body)
     }
     print 'mailing...'
-    print '\n'.join(body)
-    sendemail(data)
+    try:
+        sendemail(data)
+    except:
+        print 'Cannot mail'
+    try:
+        print u'\n'.join(body).encode('utf8')
+    except:
+        print 'Cannot print'
 
 def compare_lists():
     followers = r.zrevrange('followers', 0, -1)
     friends = r.zrevrange('friends', 0, -1)
-    body.append('*** People not following you back ***')
-    body.append('')
+    body.append(u'*** People not following you back ***')
+    body.append(u'')
     print 'finding friends that do not follow you'
     add_details_to_report(list(set(friends) - set(followers)))
-    body.append('*** People you don\'t follow back ***')
-    body.append('')
+    body.append(u'*** People you don\'t follow back ***')
+    body.append(u'')
     print 'finding followers you do not follow'
     add_details_to_report(list(set(followers) - set(friends)))
 
@@ -108,15 +116,15 @@ def compare(group):
         r.zadd(group, time(), uid)
 
     # create email body
-    body.append('*** (%s) Unfollows ***' % group)
-    body.append('')
+    body.append(u'*** (%s) Unfollows ***' % group)
+    body.append(u'')
 
     # look up info for unfollows
     if unfollow_ids:
         add_details_to_report(unfollow_ids)
 
-    body.append('*** (%s) Follows ***' % group)
-    body.append('')
+    body.append(u'*** (%s) Follows ***' % group)
+    body.append(u'')
 
     if follow_ids:
         add_details_to_report(follow_ids)
@@ -127,13 +135,16 @@ def add_details_to_report(user_ids):
     for ids in chunker(user_ids, 100):
         user_ids_string = ','.join(map(str, ids))
         #print user_ids_string
-        apiData = twitter.lookup_user(user_id=user_ids_string)
-
-        for user in apiData:
-            body.append(u'%s (%s)' % (user['screen_name'], user['name']))
-            body.append(u'https://twitter.com/%s' % user['screen_name'])
-            body.append(unicode(user['description']))
-            body.append('')
+        try:
+            apiData = twitter.lookup_user(user_id=user_ids_string)
+            
+            for user in apiData:
+                body.append(u'%s (%s)' % (unicode(user['screen_name']), unicode(user['name'])))
+                body.append(u'https://twitter.com/%s' % unicode(user['screen_name']))
+                body.append(unicode(user['description']))
+                body.append(u'')
+        except:
+            body.append(u'Cannot retrieve data for User %s.' % user_ids_string)
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
