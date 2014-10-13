@@ -10,6 +10,7 @@ from email.message import Message
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.Utils import formatdate, make_msgid
 
 r = redis.StrictRedis(host=config.REDIS_SERVER, port=config.REDIS_PORT, db=config.REDIS_DB)
 twitter = twython.Twython(app_key=config.TWITTER_CONSUMER_KEY, app_secret=config.TWITTER_CONSUMER_SECRET, oauth_token=config.TWITTER_ACCESS_TOKEN, oauth_token_secret=config.TWITTER_TOKEN_SECRET)
@@ -21,6 +22,8 @@ def sendemail(data):
                 outer['Subject'] = data['subject']
                 outer['From'] = data['from']
                 outer['To'] = data['to']
+                outer['Date'] = formatdate()
+                outer['Message-Id'] = make_msgid("andaka-twitter-report")
                 outer.preamble = ''
                 text = MIMEText( data['text'], 'plain', 'utf-8')
                 outer.attach(text)
