@@ -42,5 +42,5 @@ how to obtain one:
     * Access token        -> oauth_token
     * Access token secret -> oauth_token_secret
   * Re-check the key's access level below the token secret.
-  * If it's not at least "Read and Write", you confused the order of the steps above.
+
   
